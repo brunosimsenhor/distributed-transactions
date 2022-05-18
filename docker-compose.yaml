@@ -1,5 +1,7 @@
 version: "3.9" # optional since v1.27.0
 services:
+  # precisa que a porta 3000 do container esteja mapeada com alguma porta do host
+  # assim podemos acessar o serviço a partir diretamente do terminal do host
   coordinator:
     build:
       context: ./coordinator
@@ -10,34 +12,31 @@ services:
     volumes:
       - ./coordinator:/opt/coordinator/
 
+  # não precisa de nenhuma porta mapeada com o host, já é acessível a partir do coordenador
   "broker-01":
     build:
       context: ./participant
     hostname: broker-01
-    ports:
-      - 4001:3001
     volumes:
       - ./participant:/opt/participant/
       - ./_ephemeral/data/01:/opt/participant/data
       - ./_ephemeral/intermediate/01:/opt/participant/intermediate
 
+  # não precisa de nenhuma porta mapeada com o host, já é acessível a partir do coordenador
   "broker-02":
     build:
       context: ./participant
     hostname: broker-02
-    ports:
-      - 4002:3001
     volumes:
       - ./participant:/opt/participant/
       - ./_ephemeral/data/02:/opt/participant/data
       - ./_ephemeral/intermediate/02:/opt/participant/intermediate
 
+  # não precisa de nenhuma porta mapeada com o host, já é acessível a partir do coordenador
   "broker-03":
     build:
       context: ./participant
     hostname: broker-03
-    ports:
-      - 4003:3001
     volumes:
       - ./participant:/opt/participant/
       - ./_ephemeral/data/03:/opt/participant/data
