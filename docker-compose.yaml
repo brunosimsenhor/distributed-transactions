@@ -6,7 +6,7 @@ services:
     ports:
       - 3000:3000
     environment:
-      - "BROKERS=broker-01:3001,broker-02:3001"
+      - "BROKERS=broker-01:3001,broker-02:3001,broker-03:3001"
     volumes:
       - ./coordinator:/opt/coordinator/
 
@@ -31,3 +31,14 @@ services:
       - ./participant:/opt/participant/
       - ./_ephemeral/data/02:/opt/participant/data
       - ./_ephemeral/intermediate/02:/opt/participant/intermediate
+
+  "broker-03":
+    build:
+      context: ./participant
+    hostname: broker-03
+    ports:
+      - 4003:3001
+    volumes:
+      - ./participant:/opt/participant/
+      - ./_ephemeral/data/03:/opt/participant/data
+      - ./_ephemeral/intermediate/03:/opt/participant/intermediate
