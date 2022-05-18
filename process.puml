@@ -1,0 +1,23 @@
+@startuml "DataReplication"
+Client -> Coordinator : "New item"
+
+Coordinator -> Node : "Replicate to Node"
+Node --> Coordinator : "Commit/Abort"
+
+' Coordinator -> Node01 : "Replicate to Node 01"
+' Node01 --> Coordinator : "Commit/Abort"
+
+' Coordinator -> Node02 : "Replicate to Node 02"
+' Node02 --> Coordinator : "Commit/Abort"
+
+' Coordinator -> Node03 : "Replicate to Node 03"
+' Node03 --> Coordinator : "Commit/Abort"
+
+' Coordinator -> Node04 : "Replicate to Node 04"
+' Node04 --> Coordinator : "Commit/Abort"
+
+' Coordinator -> Node05 : "Replicate to Node 05"
+' Node05 --> Coordinator : "Commit/Abort"
+
+Coordinator --> Client : "Commit/Abort"
+@enduml
