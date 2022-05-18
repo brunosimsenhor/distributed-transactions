@@ -19,8 +19,8 @@ services:
     hostname: broker-01
     volumes:
       - ./participant:/opt/participant/
-      - ./_ephemeral/data/01:/opt/participant/data
-      - ./_ephemeral/intermediate/01:/opt/participant/intermediate
+      - ./.ephemeral/data/01:/opt/participant/data
+      - ./.ephemeral/intermediate/01:/opt/participant/intermediate
 
   # não precisa de nenhuma porta mapeada com o host, já é acessível a partir do coordenador
   "broker-02":
@@ -29,8 +29,8 @@ services:
     hostname: broker-02
     volumes:
       - ./participant:/opt/participant/
-      - ./_ephemeral/data/02:/opt/participant/data
-      - ./_ephemeral/intermediate/02:/opt/participant/intermediate
+      - ./.ephemeral/data/02:/opt/participant/data
+      - ./.ephemeral/intermediate/02:/opt/participant/intermediate
 
   # não precisa de nenhuma porta mapeada com o host, já é acessível a partir do coordenador
   "broker-03":
@@ -39,5 +39,5 @@ services:
     hostname: broker-03
     volumes:
       - ./participant:/opt/participant/
-      - ./_ephemeral/data/03:/opt/participant/data
-      - ./_ephemeral/intermediate/03:/opt/participant/intermediate
+      - ./.ephemeral/data/03:/opt/participant/data
+      - ./.ephemeral/intermediate/03:/opt/participant/intermediate
