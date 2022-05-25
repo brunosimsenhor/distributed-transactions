@@ -77,10 +77,11 @@ app.post('/messages', async function (req, res) {
 });
 
 app.get('/status/:transactionId', (req, res) => {
-  console.log('[broker]', 'join');
-
   const { transactionId } = req.params;
+
   const status = Transaction.getTransactionStatus(transactionId);
+
+  console.log('[coordinator]', '[checking transaction status]', `[${transactionId}]`, status);
 
   res.status(200).json({ status });
 });

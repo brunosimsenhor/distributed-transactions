@@ -33,7 +33,7 @@ class Transaction extends EventEmitter {
   static getTransactionStatus(transactionId) {
     const path = this.#transactionFilePath(transactionId);
 
-    if (fs.existsSync(path)) {
+    if (!fs.existsSync(path)) {
       return 'NOT_FOUND';
     }
 

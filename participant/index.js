@@ -1,23 +1,44 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const axios = require('axios');
 
 const LogFile = require('./log_file');
 const TransactionPool = require('./transaction_pool');
+
+const axiosInstance = axios.create({
+  headers: {
+    'Content-type': 'application/json'
+  },
+  baseURL: `http://coordinator:3000/`,
+  timeout: 5000,
+});
 
 const mainLog = new LogFile('./data/main.log', { persistent: true });
 
 const transactionPool = new TransactionPool('./intermediate');
 
-// checking if there are detached transactions
-(async function() {
-  const detachedTransactions = fs.readdirSync('./intermediate');
+// checking if there are loose transactions when starting up
+(async function () {
+  const detachedTransactions = transactionPool.getLogs();
 
   if (detachedTransactions.length > 0) {
-    detachedTransactions.map()
+    await Promise.all(detachedTransactions.map((t) => {
+      return axiosInstance.get(`/status/${t}`)
+        .then(({ data: { status } }) => {
+          transactionPool.create(t);
 
-    await Promise.all(detachedTransactions.map());
+          console.log('[broker]', '[transaction status]', t, status);
 
-    return true;
+          if (status === 'ROLLBACK' || status === 'NOT_FOUND') {
+            transactionRollback(t);
+          } else if(status === 'COMMIT') {
+            transactionCommit(t);
+          }
+        })
+        .catch((err) => {
+          console.error('[broker]', '[transaction status]', t, err);
+        });
+    }));
   }
 
   return true;
@@ -33,7 +54,7 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.post('/join/:transactionId', function(req, res) {
+app.post('/join/:transactionId', function (req, res) {
   console.log('[broker]', 'join');
 
   const { transactionId } = req.params;
@@ -43,7 +64,7 @@ app.post('/join/:transactionId', function(req, res) {
   res.status(201).json({ message: 'transaction started' });
 });
 
-app.post('/prepare/:transactionId', function(req, res) {
+app.post('/prepare/:transactionId', function (req, res) {
   console.log('[broker]', 'prepare');
 
   const { transactionId } = req.params;
@@ -69,7 +90,7 @@ app.post('/prepare/:transactionId', function(req, res) {
   }
 });
 
-app.post('/commit/:transactionId', async function(req, res) {
+app.post('/commit/:transactionId', async function (req, res) {
   const { transactionId } = req.params;
 
   console.log('[broker]', 'commit', transactionId);
@@ -87,7 +108,7 @@ app.post('/commit/:transactionId', async function(req, res) {
   }
 });
 
-app.post('/rollback/:transactionId', function(req, res) {
+app.post('/rollback/:transactionId', function (req, res) {
   console.log('[broker]', 'rollback');
 
   const { transactionId } = req.params;
@@ -124,6 +145,8 @@ async function transactionCommit(transactionId) {
 }
 
 async function transactionRollback(transactionId) {
+  console.log('[broker]', '[rolling back transaction]', transactionId);
+
   const logFile = transactionPool.get(transactionId);
 
   if (!logFile) {

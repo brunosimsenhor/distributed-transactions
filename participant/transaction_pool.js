@@ -1,3 +1,4 @@
+const fs = require('fs');
 const LogFile = require('./log_file');
 
 const customInspectSymbol = Symbol.for('nodejs.util.inspect.custom');
@@ -20,6 +21,24 @@ class TransactionPool {
     }
 
     throw new Error('transaction not found');
+  }
+
+  getLogs() {
+    let files = fs.readdirSync(this.#baseDir).filter((f) => {
+      return f.match(/.*\.log$/) !== null;
+    });
+
+    files = files.map((f) => {
+      const { groups: { transactionId } } = f.match(/(?<transactionId>.*)\.log$/);
+
+      return transactionId;
+    });
+
+    files.forEach((f) => {
+      this.create(f);
+    });
+
+    return files;
   }
 
   [customInspectSymbol]() {
