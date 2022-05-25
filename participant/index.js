@@ -8,6 +8,21 @@ const mainLog = new LogFile('./data/main.log', { persistent: true });
 
 const transactionPool = new TransactionPool('./intermediate');
 
+// checking if there are detached transactions
+(async function() {
+  const detachedTransactions = fs.readdirSync('./intermediate');
+
+  if (detachedTransactions.length > 0) {
+    detachedTransactions.map()
+
+    await Promise.all(detachedTransactions.map());
+
+    return true;
+  }
+
+  return true;
+})();
+
 // express for http server
 const app = express();
 
@@ -31,10 +46,10 @@ app.post('/join/:transactionId', function(req, res) {
 app.post('/prepare/:transactionId', function(req, res) {
   console.log('[broker]', 'prepare');
 
-  try {
-    const { transactionId } = req.params;
-    const message = JSON.stringify(req.body);
+  const { transactionId } = req.params;
+  const message = JSON.stringify(req.body);
 
+  try {
     logFile = transactionPool.get(transactionId);
     logFile.write(message);
 
@@ -60,12 +75,7 @@ app.post('/commit/:transactionId', async function(req, res) {
   console.log('[broker]', 'commit', transactionId);
 
   try {
-    logFile = transactionPool.get(transactionId);
-    const data = await logFile.read();
-
-    mainLog.write(data.trim());
-
-    logFile.delete();
+    transactionCommit(transactionId);
 
     res.status(201).json({
       message: 'commited',
@@ -82,11 +92,8 @@ app.post('/rollback/:transactionId', function(req, res) {
 
   const { transactionId } = req.params;
 
-  // console.log({ req, res });
-
   try {
-    logFile = transactionPool.get(transactionId);
-    logFile.delete();
+    transactionRollback(transactionId);
 
     res.status(200).json({
       message: 'rolled back',
@@ -99,3 +106,29 @@ app.post('/rollback/:transactionId', function(req, res) {
 });
 
 app.listen(3001, () => console.log(`Server is running on http://localhost:3001`));
+
+async function transactionCommit(transactionId) {
+  const logFile = transactionPool.get(transactionId);
+
+  if (!logFile) {
+    return false;
+  }
+
+  const data = await logFile.read();
+
+  mainLog.write(data.trim());
+
+  logFile.delete();
+
+  return true;
+}
+
+async function transactionRollback(transactionId) {
+  const logFile = transactionPool.get(transactionId);
+
+  if (!logFile) {
+    return false;
+  }
+
+  logFile.delete();
+}

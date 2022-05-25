@@ -76,6 +76,15 @@ app.post('/messages', async function (req, res) {
   });
 });
 
+app.get('/status/:transactionId', (req, res) => {
+  console.log('[broker]', 'join');
+
+  const { transactionId } = req.params;
+  const status = Transaction.getTransactionStatus(transactionId);
+
+  res.status(200).json({ status });
+});
+
 app.get('/healthz', (req, res) => res.status(204).json());
 
 app.listen(3000, () => console.log(`Server is running on http://localhost:3000`));

@@ -22,6 +22,26 @@ class Transaction extends EventEmitter {
     this.#id = id;
     this.#status = this.constructor.NEW;
     this.#timeout = timeout;
+
+    this.#updateTransactionLog();
+  }
+
+  static #transactionFilePath(transactionId) {
+    return `./data/${transactionId}`;
+  }
+
+  static getTransactionStatus(transactionId) {
+    const path = this.#transactionFilePath(transactionId);
+
+    if (fs.existsSync(path)) {
+      return 'NOT_FOUND';
+    }
+
+    return fs.readFileSync(path);
+  }
+
+  #updateTransactionLog() {
+    return fs.writeFileSync(`./data/${this.#id}`, this.#status);
   }
 
   status() {
@@ -66,6 +86,8 @@ class Transaction extends EventEmitter {
 
     this.emit('begin');
 
+    this.#updateTransactionLog();
+
     return Promise.resolve();
   }
 
@@ -79,6 +101,8 @@ class Transaction extends EventEmitter {
 
     this.emit('commit');
 
+    this.#updateTransactionLog();
+
     return true;
   }
 
@@ -91,6 +115,8 @@ class Transaction extends EventEmitter {
     this.#status = this.constructor.REJECTED;
 
     this.emit('rollback');
+
+    this.#updateTransactionLog();
 
     return true;
   }
